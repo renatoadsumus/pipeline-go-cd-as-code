@@ -1,0 +1,15 @@
+{
+	"name": "NOME_JOB",
+	"run_instance_count": null,
+	"environment_variables": [],
+	"timeout": 0,
+	"elastic_profile_id": null,
+	"tabs":[],
+	"resources": [
+		"RESOURCE1",
+		"RESOURCE2",
+	],
+	"artifacts": [PREENCHER COM O CONTEUDO DO TEMPLATE DE ARTIFACTS],
+	"properties": [],
+	"tasks": [PREENCHER COM O CONTEUDO DO TEMPLATE DE TASKS]
+}

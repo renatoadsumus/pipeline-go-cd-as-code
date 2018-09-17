@@ -1,0 +1,11 @@
+{
+	"url": "URL_REPOSITORIO_SVN",
+	"username": "USUARIO_SVN",
+	"encrypted_password": "SENHA_CRIPTOGRAFADA",
+	"check_externals": false,
+	"filter": {},
+	"destination": "DESTINO_MATERIAL",
+	"auto_update": true,
+	"name": "NOME_MATERIAL",
+	"type": "svn"
+}

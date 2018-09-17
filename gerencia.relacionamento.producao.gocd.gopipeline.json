@@ -1,0 +1,387 @@
+{
+	"format_version": 1,
+	"group": "Integracao_Gerencia_Relacionamento",
+	"name": "gerencia_relacionamento_producao",
+	"label_template": "${artefato_tibco}",
+	"parameters": [],
+	"mingle": {},
+	"tracking_tool": null,
+	"environment_variables": [],
+	"materials": [
+		{
+		"url": "http://infosvn/svn/10049-GerenciaRelacionamento/trunk/xml_configuracao/prd/",
+		"username": "jenkinssvn",
+		"encrypted_password": "xiFPyR3TO95O6ZoUQkLBYw==",
+		"check_externals": "false",
+		"filter": {
+			
+		},
+		"destination": "xml_configuracao",
+		"auto_update": true,
+		"name": "xml_configuracao",
+		"type": "svn"
+	},
+		{
+		"pipeline": "gerencia_relacionamento_staging",
+		"stage": "analise_de_log_tra",
+		"name": "artefato_tibco",
+		"type": "dependency"
+	}],
+	"stages": [{
+		"name": "abertura_mudanca",
+		"fetch_materials": true,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": true,
+		"approval": {
+			"type": "manual"
+		},
+		"environment_variables": [{
+				"name": "CCTI_CLASS",
+				"value": "SERVI?OS MIDDLEWARE"
+			},
+			{
+				"name": "CCTI_CATEGORY",
+				"value": "API de Relacionamento"
+			},
+			{
+				"name": "CCTI_TYPE",
+				"value": "Autom?tica"
+			},
+			{
+				"name": "CCTI_ITEM",
+				"value": "Software"
+			},
+			{
+				"name": "DESTINATARIOS_EMAIL",
+				"value": "integracao@infoglobo.com.br"
+			},
+			{
+				"name": "ID_FILA_EQUIPE",
+				"value": "50"
+			},
+			{
+				"name": "NOME_EQUIPE",
+				"value": "integracao"
+			},
+			{
+				"name": "NOME_PROJETO",
+				"value": "GerenciaRelacionamento"
+		}],
+		"jobs": [{
+			"name": "abertura_mudanca",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": ["linux_infodevops3",
+			],
+			"artifacts": [],
+			"properties": [],
+			"tasks": [{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+				              "source /home/tfsservice/continuous_delivery_env/bin/activate; python -u /opt/scripts_cd/python/scripts/criar_mudanca_automatica.py"],
+				"working_directory": ""
+			}]
+		}]
+	},
+	{
+		"name": "implantar_ear_infotbc1",
+		"fetch_materials": true,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": true,
+		"approval": {
+			"type": "manual"
+		},
+		"environment_variables": [{
+				"name": "NOME_PROJETO",
+				"value": "GerenciaRelacionamento"
+			},
+			{
+				"name": "IMPLANTADOR",
+				"value": "TIBCO"
+			},
+			{
+				"name": "ESTRUTURA_PASTA_TIBCO",
+				"value": "INFOGLOBO/Cliente/GerenciaRelacionamento"
+			},
+			{
+				"name": "SERVIDOR_DEPLOY",
+				"value": "infotbc1"
+			},
+			{
+				"name": "UsuarioSSH",
+				"value": "tibco"
+			},
+			{
+				"name": "DESTINATARIOS_EMAIL",
+				"value": "integracao@infoglobo.com.br"
+			},
+			{
+				"name": "NOME_EQUIPE",
+				"value": "integracao"
+			},
+			{
+				"name": "SERVIDOR_LOADBALANCE",
+				"value": "infoapacheprd1"
+			},
+			{
+				"name": "BACKEND",
+				"value": "b120"
+			},
+			{
+				"name": "SERVIDOR_BACKEND",
+				"value": "tbc1"
+			},
+			{
+				"name": "SERVIDOR_MASTER",
+				"value": "infotbc1"
+			},
+			{
+				"name": "SENHA_SSH",
+				"encrypted_value": "Y6doNqHEe+e6lwzpXUDBPA=="
+		}],
+		"jobs": [{
+			"name": "implantar_ear",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": [
+				"linux_infodevops3",
+			],
+			"artifacts": [],
+			"properties": [],
+			"tasks": [{
+				"type": "fetch",
+				"run_if": "passed",
+				"pipeline": "gerencia_relacionamento_commit_stage/gerencia_relacionamento_integracao/gerencia_relacionamento_staging",
+				"stage": "gerar_pacote",
+				"job": "gerar_pacote",
+				"is_source_a_file": true,
+				"source": "GerenciaRelacionamento.ear",
+				"destination": ""
+			},
+			{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+				"ssh -i /home/tfsservice/.ssh/id_rsa tfsservice@infoapacheprd1 'echo disable server b120/tbc1 | sudo nc -U /var/lib/haproxy/stats'"],
+				"working_directory": ""
+			},
+			{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+					"source /home/tfsservice/continuous_delivery_env/bin/activate; python -u /opt/scripts_cd/python/scripts/implantar_artefato.py"],
+				"working_directory": ""
+			}]
+		}]
+	},
+	{
+		"name": "habilitar_balance_tbc1",
+		"fetch_materials": true,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": true,
+		"approval": {
+			"type": "manual"
+		},
+		"environment_variables": [{
+				"name": "SERVIDOR_LOADBALANCE",
+				"value": "infoapacheprd1"
+			},
+			{
+				"name": "BACKEND",
+				"value": "b120"
+			},
+			{
+				"name": "SERVIDOR_BACKEND",
+				"value": "tbc1"
+		}],
+		"jobs": [{
+			"name": "habilitar_porta",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": [
+				"linux_infodevops3",
+			],
+			"artifacts": [],
+			"properties": [],
+			"tasks": [{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+					"ssh -i /home/tfsservice/.ssh/id_rsa tfsservice@infoapacheprd1 'echo enable server b120/tbc1 | sudo nc -U /var/lib/haproxy/stats'"],
+				"working_directory": ""
+			}]
+		}]
+	},
+	{
+		"name": "implantar_ear_infotbc2",
+		"fetch_materials": true,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": true,
+		"approval": {
+			"type": "manual"
+		},
+		"environment_variables": [{
+				"name": "NOME_PROJETO",
+				"value": "GerenciaRelacionamento"
+			},
+			{
+				"name": "IMPLANTADOR",
+				"value": "TIBCO"
+			},
+			{
+				"name": "ESTRUTURA_PASTA_TIBCO",
+				"value": "INFOGLOBO/Cliente/GerenciaRelacionamento"
+			},
+			{
+				"name": "SERVIDOR_DEPLOY",
+				"value": "infotbc2"
+			},
+			{
+				"name": "UsuarioSSH",
+				"value": "tibco"
+			},
+			{
+				"name": "DESTINATARIOS_EMAIL",
+				"value": "integracao@infoglobo.com.br"
+			},
+			{
+				"name": "NOME_EQUIPE",
+				"value": "integracao"
+			},
+			{
+				"name": "SERVIDOR_LOADBALANCE",
+				"value": "infoapacheprd1"
+			},
+			{
+				"name": "BACKEND",
+				"value": "b120"
+			},
+			{
+				"name": "SERVIDOR_BACKEND",
+				"value": "tbc2"
+			},
+			{
+				"name": "SERVIDOR_MASTER",
+				"value": "infotbc1"
+			},
+			{
+				"name": "SENHA_SSH",
+				"encrypted_value": "Y6doNqHEe+e6lwzpXUDBPA=="
+			},
+			{
+				"name": "INDEXACAO_LOG_EXECUCAO",
+				"value": "[gerencia_relacionamento]:API_Relacionamento-Deploy_Producao"
+		}],
+		"jobs": [{
+			"name": "implantar_ear",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": [
+				"linux_infodevops3",
+			],
+			"artifacts": [],
+			"properties": [],
+			"tasks": [{
+				"type": "fetch",
+				"run_if": "passed",
+				"pipeline": "gerencia_relacionamento_commit_stage/gerencia_relacionamento_integracao/gerencia_relacionamento_staging",
+				"stage": "gerar_pacote",
+				"job": "gerar_pacote",
+				"is_source_a_file": true,
+				"source": "GerenciaRelacionamento.ear",
+				"destination": ""
+			},
+			{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+					"ssh -i /home/tfsservice/.ssh/id_rsa tfsservice@infoapacheprd1 'echo disable server b120/tbc2 | sudo nc -U /var/lib/haproxy/stats'"],
+				"working_directory": ""
+			},
+			{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+					"source /home/tfsservice/continuous_delivery_env/bin/activate; python -u /opt/scripts_cd/python/scripts/implantar_artefato.py"],
+				"working_directory": ""
+			},
+			{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+					"source /home/tfsservice/continuous_delivery_env/bin/activate; python -u /opt/scripts_cd/python/scripts/atualizar_informacoes_prd_entrega_continua.py"],
+				"working_directory": ""
+			}]
+		}]
+	},
+	{
+		"name": "habilitar_balance_tbc2",
+		"fetch_materials": true,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": true,
+		"approval": {
+			"type": "manual"
+		},
+		"environment_variables": [{
+				"name": "SERVIDOR_LOADBALANCE",
+				"value": "infoapacheprd1"
+			},
+			{
+				"name": "BACKEND",
+				"value": "b120"
+			},
+			{
+				"name": "SERVIDOR_BACKEND",
+				"value": "tbc2"
+		}],
+		"jobs": [{
+			"name": "habilitar_porta",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": [
+				"linux_infodevops3",
+			],
+			"artifacts": [],
+			"properties": [],
+			"tasks": [{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+					"ssh -i /home/tfsservice/.ssh/id_rsa tfsservice@infoapacheprd1 'echo enable server b120/tbc2 | sudo nc -U /var/lib/haproxy/stats'"],
+				"working_directory": ""
+			}]
+		}]
+	}]
+}

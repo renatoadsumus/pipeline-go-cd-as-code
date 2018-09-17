@@ -1,0 +1,13 @@
+{
+	"format_version": 1,
+	"group": "NOME_DO_PIPELINE_GROUP",
+	"name": "NOME_DO_PIPELINE",
+	"label_template": "TEMPLATE_COM_REVISION_PACOTE - Revision-${NOME_MATERIAL} se for commit-stage e ${NOME_MATERIAL} se for qualquer outro",
+	"parameters": [],
+	"mingle": {},
+	"tracking_tool": null,
+	"environment_variables": [],
+	"materials": ["PREENCHER COM O CONTEUDO DO TEMPLATE DE MATERIALS"],
+	"lock_behavior": "lockOnFailure - lock_behavior só deve ser usado para pipelines de deploy e com a opção lockOnFailure. Remover caso não seja o caso",
+	"stages":["PREENCHER COM O CONTEUDO DO TEMPLATE DE STAGES"]
+}

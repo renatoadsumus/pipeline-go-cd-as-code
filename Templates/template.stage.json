@@ -1,0 +1,16 @@
+{
+	"name": "NOME_STAGE",
+	"fetch_materials": true or false,
+	"never_cleanup_artifacts": false,
+	"clean_working_directory": true or false,
+	"approval"(somente no primeiro stage do pipeline): { "type": "manual" },
+	"environment_variables":[{
+		"name": "NOME_VARIAVEL",
+		"value": "VALOR_VARIAVEL"
+	},
+	{
+		"name": "NOME_VARIAVEL",
+		"encrypted_value": "VALOR_VARIAVEL_CRIPTOGRAFADA"
+	}],
+	"jobs": [PREENCHER COM O CONTEUDO DO TEMPLATE DE JOB]
+}

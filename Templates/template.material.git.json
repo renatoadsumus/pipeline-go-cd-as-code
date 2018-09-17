@@ -1,0 +1,9 @@
+{
+	"url": "https://usuario:token@github.com/CAMINHO_REPOSITORIO_GIT",
+	"branch": "NOME_BRANCH",
+	"filter": {},
+	"destination": "DESTINO_MATERIAL",
+	"auto_update": true,
+	"name": "NOME_MATERIAL",
+	"type": "git"
+}

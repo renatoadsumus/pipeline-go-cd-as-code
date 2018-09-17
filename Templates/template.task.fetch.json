@@ -1,0 +1,10 @@
+{
+	"type": "fetch",
+	"run_if": "passed",
+	"pipeline": "NOME_PIPELINE_MATERIAL",
+	"stage": "STAGE_PIPELINE_MATERIAL",
+	"job": "JOB_PIPELINE_MATERIAL",
+	"is_source_a_file": true or false,
+	"source": "NOME_SOURCE",
+	"destination": "DESTINO_SOURCE (NORMALMENTE FICA EM BRANCO)"
+}

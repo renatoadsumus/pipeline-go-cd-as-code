@@ -1,0 +1,134 @@
+{
+	"format_version": 1,
+	"group": "Integracao_Gerencia_Relacionamento",
+	"name": "gerencia_relacionamento_commit_stage",
+	"label_template": "Revision-${GerenciaRelacionamento}",
+	"parameters": [],
+	"mingle": {},
+	"tracking_tool": null,
+	"environment_variables": [],
+	"materials": [
+		{
+		"url": "http://infosvn/svn/10049-GerenciaRelacionamento/trunk/Fontes/GerenciaRelacionamento",
+		"username": "jenkinssvn",
+		"encrypted_password": "xiFPyR3TO95O6ZoUQkLBYw==",
+		"check_externals": "false",
+		"filter": {
+			
+		},
+		"destination": "GerenciaRelacionamento",
+		"auto_update": true,
+		"name": "GerenciaRelacionamento",
+		"type": "svn"
+		},
+		{
+		"pipeline": "integracao_infoglobo_commons_atualizacao",
+		"stage": "atualizacao",
+		"name": "infoglobo_commons",
+		"type": "dependency"
+	}],
+	"stages": [{
+		"name": "validacao",
+		"fetch_materials": true,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": true,
+		"approval": {
+			"type": "manual"
+		},
+		"environment_variables": [{
+				"name": "NOME_PROJETO",
+				"value": "GerenciaRelacionamento"
+			},
+			{
+				"name": "BUILDER",
+				"value": "TIBCO"
+		}],
+		"jobs": [{
+			"name": "executar_testes",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": ["windows1",
+			],
+			"artifacts": [{
+				"source": "log-validacao.log",
+				"destination": "testoutput",
+				"type": "test"
+			}],
+			"properties": [],
+			"tasks": [{
+				"type": "fetch",
+				"run_if": "passed",
+				"pipeline": "integracao_infoglobo_commons_atualizacao",
+				"stage": "atualizacao",
+				"job": "atualizacao",
+				"is_source_a_file": true,
+				"source": "infoglobo_commons.zip",
+				"destination": ""
+			},
+			{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "unzip",
+				"arguments": ["infoglobo_commons.zip"],
+				"working_directory": ""
+			},
+			{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "powershell",
+				"arguments": [". $env:DIRETORIO_PYVENV\\Scripts\\Activate.ps1; python -u E:\\scripts_cd\\python\\scripts\\executar_testes_unitarios.py"],
+				"working_directory": ""
+			}]
+		}]
+	},
+	{
+		"name": "gerar_pacote",
+		"fetch_materials": false,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": false,
+		"environment_variables": [{
+				"name": "NOME_PROJETO",
+				"value": "GerenciaRelacionamento"
+			},
+			{
+				"name": "BUILDER",
+				"value": "TIBCO"
+			},
+			{
+				"name": "INDEXACAO_LOG_EXECUCAO",
+				"value": "[gerencia_relacionamento]:API_Relacionamento-Commit_Stage"
+		}],
+		"jobs": [{
+			"name": "gerar_pacote",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": [
+				"windows1",
+			],
+			"artifacts": [{
+				"source": "GerenciaRelacionamento.ear",
+				"destination": "",
+				"type": "build"
+			}],
+			"properties": [],
+			"tasks": [{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "powershell",
+				"arguments": [
+					". $env:DIRETORIO_PYVENV\\Scripts\\Activate.ps1; python -u E:\\scripts_cd\\python\\scripts\\fechar_artefato.py"
+				],
+				"working_directory": ""
+			}]
+		}]
+	}]
+}

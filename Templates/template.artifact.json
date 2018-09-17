@@ -1,0 +1,5 @@
+{
+	"source": "NOME_SOURCE",
+	"destination": "DESTINO_SOURCE",
+	"type": "test or build"
+}

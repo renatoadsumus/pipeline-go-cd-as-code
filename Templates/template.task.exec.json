@@ -1,0 +1,11 @@
+{
+	"type": "exec",
+	"run_if": "passed",
+	"on_cancel": null - menos se for o caso de jobs que precisam garantir que um container vai morrer caso seja cancelado,
+	"command": "echo",
+	"arguments":[
+		"argumento 1",
+		"argumento 2"
+	],
+	"working_directory": "PATH_WORKING_DIRECTORY OU DEIXAR EM BRANCO"
+}

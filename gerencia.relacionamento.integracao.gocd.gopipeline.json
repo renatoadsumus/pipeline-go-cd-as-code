@@ -1,0 +1,172 @@
+{ 
+	"format_version": 1,
+	"group": "Integracao_Gerencia_Relacionamento",
+	"name": "gerencia_relacionamento_integracao",
+	"label_template": "${artefato_tibco}",
+	"parameters": [],
+	"mingle": {},
+	"tracking_tool": null,
+	"environment_variables": [],
+	"materials": [
+		{
+		"url": "http://infosvn/svn/10049-GerenciaRelacionamento/trunk/xml_configuracao/int/",
+		"username": "jenkinssvn",
+		"encrypted_password": "xiFPyR3TO95O6ZoUQkLBYw==",
+		"check_externals": "false",
+		"filter": {
+			
+		},
+		"destination": "xml_configuracao",
+		"auto_update": true,
+		"name": "xml_configuracao",
+		"type": "svn"
+	},
+		{
+		"url": "http://infosvn/svn/10049-GerenciaRelacionamento/trunk/Testes/",
+		"username": "jenkinssvn",
+		"encrypted_password": "xiFPyR3TO95O6ZoUQkLBYw==",
+		"check_externals": "false",
+		"filter": {
+			
+		},
+		"destination": "xml_testes",
+		"auto_update": true,
+		"name": "xml_testes",
+		"type": "svn"
+	},
+		{
+		"pipeline": "gerencia_relacionamento_commit_stage",
+		"stage": "gerar_pacote",
+		"name": "artefato_tibco",
+		"type": "dependency"
+	},
+		{
+		"url": "https://devops-infoglobo:V164ry%408P@github.com/Infoglobo/devops.git",
+		"branch": "master",
+		"filter": {},
+		"destination": "devops",
+		"auto_update": true,
+		"name": "devops",
+		"type": "git"
+	}],
+	"stages": [{
+		"name": "implantar_ear",
+		"fetch_materials": true,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": true,
+		"approval": {
+			"type": "manual"
+		},
+		"environment_variables": [{
+				"name": "NOME_PROJETO",
+				"value": "GerenciaRelacionamento"
+			},
+			{
+				"name": "IMPLANTADOR",
+				"value": "TIBCO"
+			},
+			{
+				"name": "ESTRUTURA_PASTA_TIBCO",
+				"value": "INFOGLOBO/Cliente/GerenciaRelacionamento"
+			},
+			{
+				"name": "SERVIDOR_DEPLOY",
+				"value": "infotbcdsv"
+			},
+			{
+				"name": "SERVIDOR_MASTER",
+				"value": "infotbcdsv"
+			},
+			{
+				"name": "UsuarioSSH",
+				"value": "tibco"
+			},
+			{
+				"name": "INDEXACAO_LOG_EXECUCAO",
+				"value": "[gerencia_relacionamento]:API_Relacionamento-Deploy_Integracao"
+			},
+			{
+				"name": "SENHA_SSH",
+				"encrypted_value": "sQEfT3VoAPz2oFxJR18mJQ=="
+		}],
+		"jobs": [{
+			"name": "implantar_ear",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": ["linux_infodevops3",
+			],
+			"artifacts": [],
+			"properties": [],
+			"tasks": [{
+				"type": "fetch",
+				"run_if": "passed",
+				"pipeline": "gerencia_relacionamento_commit_stage",
+				"stage": "gerar_pacote",
+				"job": "gerar_pacote",
+				"is_source_a_file": true,
+				"source": "GerenciaRelacionamento.ear",
+				"destination": ""
+			},
+			{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+				              "source /home/tfsservice/continuous_delivery_env/bin/activate; python -u /opt/scripts_cd/python/scripts/implantar_artefato.py"],
+				"working_directory": ""
+			}]
+		}]
+	},
+	{
+		"name": "smoke_tests",
+		"fetch_materials": true,
+		"never_cleanup_artifacts": false,
+		"clean_working_directory": false,
+		"approval": {
+			"type": "manual"
+		},
+		"environment_variables": [{
+				"name": "XML_PROJETO",
+				"value": "xml_testes/GerenciaRelacionamento-V2-REST-soapui-project.xml"
+			},
+			{
+				"name": "ENDPOINT_TESTES",
+				"value": "https://apidsv"
+			},
+			{
+				"name": "ESTRUTURA_PASTA_TIBCO",
+				"value": "INFOGLOBO/Cliente/GerenciaRelacionamento"
+			},
+			{
+				"name": "TEST_SUIT",
+				"value": "SmokeTests"
+		}],
+		"jobs": [{
+			"name": "smoke_tests",
+			"run_instance_count": null,
+			"environment_variables": [],
+			"timeout": 0,
+			"elastic_profile_id": null,
+			"tabs": [],
+			"resources": [
+				"linux_infodevops3",
+			],
+			"artifacts": [],
+			"properties": [],
+			"tasks": [{
+				"type": "exec",
+				"run_if": "passed",
+				"on_cancel": null,
+				"command": "/bin/bash",
+				"arguments": ["-c",
+					"chmod +x devops/docker/soapui/4.5.2/docker_run.sh && ./devops/docker/soapui/4.5.2/docker_run.sh gerencia_relacionamento_integracao_smoke $GO_PIPELINE_NAME"
+				],
+				"working_directory": ""
+			}]
+		}]
+	}]
+}

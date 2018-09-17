@@ -1,0 +1,6 @@
+{
+	"pipeline": "NOME_PIPELINE",
+	"stage": "NOME_STAGE",
+	"name": "NOME_MATERIAL",
+	"type": "dependency"
+}
